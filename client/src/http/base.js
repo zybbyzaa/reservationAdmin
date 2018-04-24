@@ -1,8 +1,12 @@
 import axios from 'axios'
+import { getCookie } from '../utils/cookie'
 
 // axios 配置
 axios.defaults.timeout = 10000
 axios.defaults.baseURL = '/api'
+if (process.env === 'production') {
+  axios.defaults.headers['x-csrf-token'] = getCookie('csrfToken')
+}
 
 axios.interceptors.response.use(
   response => {
