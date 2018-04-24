@@ -1,0 +1,100 @@
+<template>
+  <div class="loginPage">
+    <div class="form">
+      <el-row>
+        <el-col :span="24">
+          <el-form label="" :label-position="labelPosition" label-width="100px" :model="ruleForm" ref="ruleForm" :rules="rules">
+            <el-form-item label="账 号" prop="name">
+              <el-input v-model="ruleForm.name" type="text" @keyup.enter.native="submitForm('ruleForm')"></el-input>
+            </el-form-item>
+            <el-form-item label="密 码" style="color: #fff;" prop="password">
+              <el-input v-model="ruleForm.password" type="password" @keyup.enter.native="submitForm('ruleForm')"></el-input>
+            </el-form-item>
+            <el-form-item label="">
+              <el-button type="primary" @click="submitForm('ruleForm')">登 录</el-button>
+              <el-button type="info" @click="clearForm('ruleForm')">重 置</el-button>
+            </el-form-item>
+          </el-form>
+        </el-col>
+      </el-row>
+    </div>
+  </div>
+</template>
+
+<script>
+import { mapMutations } from 'vuex';
+import { login } from '../http/user';
+export default {
+  name: 'Login',
+  data() {
+    return {
+      ruleForm: {
+        name: '',
+        password: ''
+      },
+      isPass: false,
+      labelPosition: 'right',
+      rules: {
+        name: [{ required: true, message: '请输入账号名', trigger: 'blur' }],
+        password: [{ required: true, message: '请输入密码', trigger: 'blur' }]
+      }
+    };
+  },
+  methods: {
+    ...mapMutations(['LOGIN']),
+    submitForm(formName) {
+      this.$refs[formName].validate(valid => {
+        if (valid) {
+          login({
+            name: this.ruleForm.name,
+            password: this.ruleForm.password
+          })
+            .then(res => {
+              if (res.code === 200) {
+                this.LOGIN(res.data);
+                this.$router.push(this.$route.query.redirect || '/main');
+              } else {
+                this.$message.error(res.msg);
+              }
+            })
+            .catch(err => {
+              this.$message.error(err.message);
+            });
+        }
+      });
+    },
+    clearForm(formName) {
+      this.$refs[formName].resetFields();
+      this.isPass = false;
+    }
+  }
+};
+</script>
+
+<style scoped>
+.loginPage
+{
+    flex: 1;
+
+    width: 100%;
+    height: 100%;
+
+    background-image: url('../assets/bg_login.jpg');
+    background-size: auto;
+}
+.form
+{
+    width: 450px;
+    height: 350px;
+    margin: 300px auto 0;
+}
+.el-button
+{
+    margin-top: 20px;
+}
+.el-form-item__label
+{
+    color: #fff;
+}
+
+</style>
